@@ -1,0 +1,8 @@
+{
+  "name": "SilverAge Census",
+  "description": "A high-accessibility, age-friendly population data collection application designed for iPad interfaces.",
+  "requestFramePermissions": [
+    "microphone",
+    "geolocation"
+  ]
+}

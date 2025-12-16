@@ -1,0 +1,48 @@
+import React from 'react';
+import { 
+  User, 
+  CreditCard, 
+  MapPin, 
+  Phone, 
+  BookOpen, 
+  Users, 
+  Briefcase, 
+  Home, 
+  CheckCircle, 
+  Mic, 
+  ZoomIn, 
+  ZoomOut,
+  ChevronLeft,
+  ChevronRight,
+  Save,
+  RotateCcw,
+  Map as MapIcon,
+  Filter,
+  BarChart3,
+  Flag,
+  Globe
+} from 'lucide-react';
+
+export const Icons = {
+  User,
+  ID: CreditCard,
+  Address: MapPin,
+  Phone,
+  Education: BookOpen,
+  Marital: Users,
+  Job: Briefcase,
+  Home,
+  Check: CheckCircle,
+  Mic,
+  ZoomIn,
+  ZoomOut,
+  Back: ChevronLeft,
+  Next: ChevronRight,
+  Save,
+  Reset: RotateCcw,
+  Map: MapIcon,
+  Filter,
+  Chart: BarChart3,
+  Ethnicity: Flag,
+  Ancestry: Globe
+};
