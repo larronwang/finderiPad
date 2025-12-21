@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   User, 
@@ -27,6 +28,8 @@ import {
 
 export const Icons = {
   User,
+  // Add Users icon to avoid property access error in CensusMap.tsx
+  Users,
   ID: CreditCard,
   Address: MapPin,
   Phone,

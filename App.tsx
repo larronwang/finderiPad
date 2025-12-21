@@ -7,50 +7,6 @@ import { saveProgress, loadProgress, clearProgress } from './services/idParser';
 import { translations } from './services/translations';
 import { Icons as AppIcons, FinderLogo } from './components/Icons';
 
-const StatusBar = () => {
-  const [time, setTime] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const formatTime = (date: Date) => {
-    // Standard iOS format: "9:41"
-    const hours = date.getHours();
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
-  };
-
-  return (
-    <div className="status-bar">
-      <div className="status-time text-[16px] pl-2">{formatTime(time)}</div>
-      <div className="status-icons flex items-center gap-[6px]">
-        {/* Cellular Signal - Native iOS Style */}
-        <div className="flex items-end gap-[1.5px] h-[11px] mb-[1px]">
-          <div className="w-[3px] h-[4px] bg-black rounded-[0.5px]"></div>
-          <div className="w-[3px] h-[6px] bg-black rounded-[0.5px]"></div>
-          <div className="w-[3px] h-[8px] bg-black rounded-[0.5px]"></div>
-          <div className="w-[3px] h-[11px] bg-black rounded-[0.5px]"></div>
-        </div>
-        
-        {/* Wi-Fi Icon - Precise 3-Arc Design */}
-        <svg width="17" height="13" viewBox="0 0 17 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M8.5 12.5C9.32843 12.5 10 11.8284 10 11C10 10.1716 9.32843 9.5 8.5 9.5C7.67157 9.5 7 10.1716 7 11C7 11.8284 7.67157 12.5 8.5 12.5Z" fill="black"/>
-          <path fillRule="evenodd" clipRule="evenodd" d="M13.2575 6.24251C10.6304 3.6154 6.3696 3.6154 3.74249 6.24251L2.32828 4.8283C5.73551 1.42107 11.2645 1.42107 14.6717 4.8283L13.2575 6.24251Z" fill="black"/>
-          <path fillRule="evenodd" clipRule="evenodd" d="M11.1362 8.36378C9.68228 6.90989 7.31772 6.90989 5.86383 8.36378L4.44962 6.94957C6.68537 4.71382 10.3146 4.71382 12.5504 6.94957L11.1362 8.36378Z" fill="black"/>
-          <path fillRule="evenodd" clipRule="evenodd" d="M15.3789 4.12111L16.7931 2.7069C12.2155 -1.87063 4.78448 -1.87063 0.206909 2.7069L1.62112 4.12111C5.41913 0.323101 11.5809 0.323101 15.3789 4.12111Z" fill="black"/>
-        </svg>
-
-        {/* Battery Icon */}
-        <div className="battery-icon">
-          <div className="battery-level w-[88%] h-full bg-black rounded-[1px]"></div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>({
     view: 'home',
@@ -137,194 +93,182 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="relative">
-      <div className="phone-aura"></div>
+    <div className="screen-container">
+      {/* Status Bar removed per user request */}
       
-      <div className="iphone-frame">
-        <div className="dynamic-island">
-          <div className="dynamic-island-camera"></div>
-        </div>
-        
-        <div className="home-indicator"></div>
+      {appState.view === 'wizard' && (
+        <header className="bg-white/90 backdrop-blur-xl border-b border-slate-100 px-6 pt-12 pb-4 flex justify-between items-center z-50 shrink-0">
+          <div className="flex items-center gap-2">
+            <FinderLogo className="w-8 h-8" />
+            <span className="font-black text-lg text-slate-900 tracking-tighter uppercase">{t.appName}</span>
+          </div>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => setAppState(prev => ({ ...prev, language: prev.language === 'en' ? 'zh-HK' : 'en' }))}
+              className="bg-slate-100 px-3 py-1.5 rounded-xl font-black text-[10px] text-slate-600 border border-slate-200"
+            >
+              {appState.language === 'en' ? '繁' : 'EN'}
+            </button>
+            <button 
+              onClick={() => setAppState(prev => ({ ...prev, fontSizeMode: prev.fontSizeMode === 'large' ? 'extra-large' : 'large' }))}
+              className="bg-indigo-50 text-indigo-900 w-10 h-10 rounded-xl flex items-center justify-center border border-indigo-100"
+            >
+              {isLarge ? <AppIcons.ZoomIn size={18} /> : <AppIcons.ZoomOut size={18} />}
+            </button>
+          </div>
+        </header>
+      )}
 
-        <div className="iphone-screen">
-          <StatusBar />
-          
-          {appState.view === 'wizard' && (
-            <header className="bg-white/90 backdrop-blur-xl border-b border-slate-100 px-6 pt-16 pb-4 flex justify-between items-center z-50 shrink-0">
-              <div className="flex items-center gap-2">
-                <FinderLogo className="w-8 h-8" />
-                <span className="font-black text-lg text-slate-900 tracking-tighter uppercase">{t.appName}</span>
-              </div>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => setAppState(prev => ({ ...prev, language: prev.language === 'en' ? 'zh-HK' : 'en' }))}
-                  className="bg-slate-100 px-3 py-1.5 rounded-xl font-black text-[10px] text-slate-600 border border-slate-200"
-                >
-                  {appState.language === 'en' ? '繁' : 'EN'}
-                </button>
-                <button 
-                  onClick={() => setAppState(prev => ({ ...prev, fontSizeMode: prev.fontSizeMode === 'large' ? 'extra-large' : 'large' }))}
-                  className="bg-indigo-50 text-indigo-900 w-10 h-10 rounded-xl flex items-center justify-center border border-indigo-100"
-                >
-                  {isLarge ? <AppIcons.ZoomIn size={18} /> : <AppIcons.ZoomOut size={18} />}
-                </button>
-              </div>
-            </header>
-          )}
+      <main className="flex-1 overflow-hidden relative">
+        {appState.view === 'home' ? (
+          <div className="w-full h-full flex flex-col items-center justify-between bg-[#f8fafc] p-8 pt-24 pb-12">
+            <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-1000 w-full">
+              <FinderLogo className="w-36 h-36 mb-10" />
+              <h1 className="text-[5rem] font-black text-slate-900 tracking-tighter mb-4 leading-none uppercase">
+                Finder
+              </h1>
+              <p className="text-2xl text-slate-400 font-semibold max-w-[320px] tracking-tight leading-snug">
+                Next-Gen Census Discovery for the Silver Generation.
+              </p>
+            </div>
 
-          <main className="flex-1 overflow-hidden relative">
-            {appState.view === 'home' ? (
-              <div className="w-full h-full flex flex-col items-center justify-between bg-[#f8fafc] p-8 pt-44 pb-24">
-                <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-1000 w-full">
-                  <FinderLogo className="w-36 h-36 mb-10" />
-                  <h1 className="text-[5rem] font-black text-slate-900 tracking-tighter mb-4 leading-none uppercase">
-                    Finder
-                  </h1>
-                  <p className="text-2xl text-slate-400 font-semibold max-w-[320px] tracking-tight leading-snug">
-                    Next-Gen Census Discovery for the Silver Generation.
-                  </p>
-                </div>
-
-                <div className="w-full flex flex-col gap-5">
-                  <button 
-                    onClick={() => setAppState(prev => ({ ...prev, view: 'wizard' }))}
-                    className="bg-indigo-950 text-white rounded-[2rem] py-8 text-3xl font-black shadow-2xl shadow-indigo-200 hover:bg-black transition-all active:scale-[0.98] flex items-center justify-center gap-4"
+            <div className="w-full flex flex-col gap-5">
+              <button 
+                onClick={() => setAppState(prev => ({ ...prev, view: 'wizard' }))}
+                className="bg-indigo-950 text-white rounded-[2rem] py-8 text-3xl font-black shadow-2xl shadow-indigo-200 hover:bg-black transition-all active:scale-[0.98] flex items-center justify-center gap-4"
+              >
+                Get Started <AppIcons.Next size={28} />
+              </button>
+              
+              <div className="flex gap-3 justify-center">
+                {(['en', 'zh-HK'] as Language[]).map(lang => (
+                  <button
+                    key={lang}
+                    onClick={() => setAppState(prev => ({ ...prev, language: lang }))}
+                    className={`flex-1 py-4 rounded-2xl font-black text-sm tracking-widest uppercase transition-all border-2 ${appState.language === lang ? 'bg-white border-indigo-600 text-indigo-900 shadow-xl shadow-indigo-100/50' : 'bg-transparent border-slate-200 text-slate-400'}`}
                   >
-                    Get Started <AppIcons.Next size={28} />
+                    {lang === 'en' ? 'English' : '繁體中文'}
                   </button>
-                  
-                  <div className="flex gap-3 justify-center">
-                    {(['en', 'zh-HK'] as Language[]).map(lang => (
-                      <button
-                        key={lang}
-                        onClick={() => setAppState(prev => ({ ...prev, language: lang }))}
-                        className={`flex-1 py-4 rounded-2xl font-black text-sm tracking-widest uppercase transition-all border-2 ${appState.language === lang ? 'bg-white border-indigo-600 text-indigo-900 shadow-xl shadow-indigo-100/50' : 'bg-transparent border-slate-200 text-slate-400'}`}
-                      >
-                        {lang === 'en' ? 'English' : '繁體中文'}
+                ))}
+              </div>
+            </div>
+
+            <div className="text-[11px] font-bold text-slate-300 tracking-[0.4em] uppercase text-center mt-6">
+               Secure • Digital Native • 2025
+            </div>
+          </div>
+        ) : appState.view === 'map' ? (
+          <CensusMap userData={appState.data} onReset={() => setAppState(prev => ({ ...prev, view: 'home', currentStep: 1 }))} fontSizeMode={appState.fontSizeMode} language={appState.language} />
+        ) : (
+          <StepWizard
+            currentStep={appState.currentStep}
+            totalSteps={STEPS.length}
+            title={(t as any)[currentStepInfo.key]}
+            description={t.reviewMsg}
+            onBack={() => setAppState(prev => ({ ...prev, currentStep: Math.max(1, prev.currentStep - 1) }))}
+            onNext={nextStep}
+            canNext={canProceed()}
+            fontSizeMode={appState.fontSizeMode}
+            language={appState.language}
+          >
+            <div className="space-y-8 pb-20">
+              {appState.currentStep === 1 && (
+                <>
+                  <InputWithVoice label={t.fullName} value={appState.data.fullName} onChange={v => updateData('fullName', v)} fontSizeMode={appState.fontSizeMode} language={appState.language} placeholder={t.placeholders.name} />
+                  <InputWithVoice label={t.birthDate} type="date" value={appState.data.birthDate} onChange={v => updateData('birthDate', v)} fontSizeMode={appState.fontSizeMode} language={appState.language} />
+                  <div className="space-y-4">
+                    <label className="block font-black text-slate-900 uppercase tracking-widest text-[11px] opacity-40">{t.gender}</label>
+                    <div className="flex flex-col gap-3">
+                      {['Male', 'Female'].map(g => (
+                        <SelectionCard key={g} label={(t as any)[g.toLowerCase()]} selected={appState.data.gender === g} onClick={() => updateData('gender', g)} fontSizeMode={appState.fontSizeMode} />
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {appState.currentStep === 2 && (
+                <>
+                  <InputWithVoice label={t.phone} value={appState.data.phoneNumber} onChange={v => updateData('phoneNumber', v)} fontSizeMode={appState.fontSizeMode} type="tel" language={appState.language} placeholder={t.placeholders.phone} />
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <label className="block font-black text-slate-900 uppercase tracking-widest text-[11px] opacity-40">{t.address}</label>
+                      <button onClick={handleGeolocation} className="text-emerald-600 font-black text-[11px] flex items-center gap-1">
+                        <AppIcons.Address size={14} /> {t.gps}
                       </button>
-                    ))}
+                    </div>
+                    <InputWithVoice label="" value={appState.data.address} onChange={v => updateData('address', v)} fontSizeMode={appState.fontSizeMode} language={appState.language} placeholder={t.placeholders.address} />
+                  </div>
+                </>
+              )}
+
+              {appState.currentStep === 3 && (
+                <div className="space-y-12">
+                  <div>
+                    <h3 className="font-black text-slate-900 text-[11px] uppercase tracking-[0.2em] mb-5 opacity-40">{t.education}</h3>
+                    <div className="grid grid-cols-1 gap-4">
+                      {['High School', 'Undergraduate'].map(opt => (
+                        <SelectionCard key={opt} label={(t.educationLevels as any)[opt.toLowerCase().split(' ')[0]] || opt} selected={appState.data.education === opt} onClick={() => updateData('education', opt)} fontSizeMode={appState.fontSizeMode} />
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="font-black text-slate-900 text-[11px] uppercase tracking-[0.2em] mb-5 opacity-40">{t.marital}</h3>
+                    <div className="grid grid-cols-1 gap-4">
+                      {['Married', 'Single'].map(m => (
+                        <SelectionCard key={m} label={(t.maritalStatus as any)[m.toLowerCase()]} selected={appState.data.maritalStatus === m} onClick={() => updateData('maritalStatus', m)} fontSizeMode={appState.fontSizeMode} />
+                      ))}
+                    </div>
                   </div>
                 </div>
+              )}
 
-                <div className="text-[11px] font-bold text-slate-300 tracking-[0.4em] uppercase text-center mt-6">
-                   Secure • iPhone 17 Pro Max • 2025
+              {appState.currentStep === 4 && (
+                <div className="space-y-12">
+                  <div>
+                    <h3 className="font-black text-slate-900 text-[11px] uppercase tracking-[0.2em] mb-5 opacity-40">{t.housing}</h3>
+                    <div className="grid grid-cols-1 gap-4">
+                      {['Owned', 'Rented'].map(h => (
+                        <SelectionCard key={h} label={(t.housingTypes as any)[h.toLowerCase()] || h} selected={appState.data.housingType === h} onClick={() => updateData('housingType', h)} fontSizeMode={appState.fontSizeMode} icon={AppIcons.Home} />
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="font-black text-slate-900 text-[11px] uppercase tracking-[0.2em] mb-5 opacity-40">{t.employment}</h3>
+                    <div className="grid grid-cols-1 gap-4">
+                      {['Retired', 'Working'].map(e => (
+                        <SelectionCard key={e} label={t.employmentStatus[e.toLowerCase() as keyof typeof t.employmentStatus]} selected={appState.data.employmentStatus === e} onClick={() => updateData('employmentStatus', e)} fontSizeMode={appState.fontSizeMode} icon={AppIcons.Job} />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-6 pt-10 border-t border-slate-100">
+                    <InputWithVoice label={t.occupation} value={appState.data.occupation} onChange={v => updateData('occupation', v)} fontSizeMode={appState.fontSizeMode} language={appState.language} />
+                    <InputWithVoice label={t.hobby} value={appState.data.hobby} onChange={v => updateData('hobby', v)} fontSizeMode={appState.fontSizeMode} language={appState.language} />
+                  </div>
                 </div>
-              </div>
-            ) : appState.view === 'map' ? (
-              <CensusMap userData={appState.data} onReset={() => setAppState(prev => ({ ...prev, view: 'home', currentStep: 1 }))} fontSizeMode={appState.fontSizeMode} language={appState.language} />
-            ) : (
-              <StepWizard
-                currentStep={appState.currentStep}
-                totalSteps={STEPS.length}
-                title={(t as any)[currentStepInfo.key]}
-                description={t.reviewMsg}
-                onBack={() => setAppState(prev => ({ ...prev, currentStep: Math.max(1, prev.currentStep - 1) }))}
-                onNext={nextStep}
-                canNext={canProceed()}
-                fontSizeMode={appState.fontSizeMode}
-                language={appState.language}
-              >
-                <div className="space-y-8 pb-20">
-                  {appState.currentStep === 1 && (
-                    <>
-                      <InputWithVoice label={t.fullName} value={appState.data.fullName} onChange={v => updateData('fullName', v)} fontSizeMode={appState.fontSizeMode} language={appState.language} placeholder={t.placeholders.name} />
-                      <InputWithVoice label={t.birthDate} type="date" value={appState.data.birthDate} onChange={v => updateData('birthDate', v)} fontSizeMode={appState.fontSizeMode} language={appState.language} />
-                      <div className="space-y-4">
-                        <label className="block font-black text-slate-900 uppercase tracking-widest text-[11px] opacity-40">{t.gender}</label>
-                        <div className="flex flex-col gap-3">
-                          {['Male', 'Female'].map(g => (
-                            <SelectionCard key={g} label={(t as any)[g.toLowerCase()]} selected={appState.data.gender === g} onClick={() => updateData('gender', g)} fontSizeMode={appState.fontSizeMode} />
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  )}
+              )}
 
-                  {appState.currentStep === 2 && (
-                    <>
-                      <InputWithVoice label={t.phone} value={appState.data.phoneNumber} onChange={v => updateData('phoneNumber', v)} fontSizeMode={appState.fontSizeMode} type="tel" language={appState.language} placeholder={t.placeholders.phone} />
-                      <div className="space-y-4">
-                        <div className="flex justify-between items-center">
-                          <label className="block font-black text-slate-900 uppercase tracking-widest text-[11px] opacity-40">{t.address}</label>
-                          <button onClick={handleGeolocation} className="text-emerald-600 font-black text-[11px] flex items-center gap-1">
-                            <AppIcons.Address size={14} /> {t.gps}
-                          </button>
-                        </div>
-                        <InputWithVoice label="" value={appState.data.address} onChange={v => updateData('address', v)} fontSizeMode={appState.fontSizeMode} language={appState.language} placeholder={t.placeholders.address} />
-                      </div>
-                    </>
-                  )}
-
-                  {appState.currentStep === 3 && (
-                    <div className="space-y-12">
-                      <div>
-                        <h3 className="font-black text-slate-900 text-[11px] uppercase tracking-[0.2em] mb-5 opacity-40">{t.education}</h3>
-                        <div className="grid grid-cols-1 gap-4">
-                          {['High School', 'Undergraduate'].map(opt => (
-                            <SelectionCard key={opt} label={(t.educationLevels as any)[opt.toLowerCase().split(' ')[0]] || opt} selected={appState.data.education === opt} onClick={() => updateData('education', opt)} fontSizeMode={appState.fontSizeMode} />
-                          ))}
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="font-black text-slate-900 text-[11px] uppercase tracking-[0.2em] mb-5 opacity-40">{t.marital}</h3>
-                        <div className="grid grid-cols-1 gap-4">
-                          {['Married', 'Single'].map(m => (
-                            <SelectionCard key={m} label={(t.maritalStatus as any)[m.toLowerCase()]} selected={appState.data.maritalStatus === m} onClick={() => updateData('maritalStatus', m)} fontSizeMode={appState.fontSizeMode} />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {appState.currentStep === 4 && (
-                    <div className="space-y-12">
-                      <div>
-                        <h3 className="font-black text-slate-900 text-[11px] uppercase tracking-[0.2em] mb-5 opacity-40">{t.housing}</h3>
-                        <div className="grid grid-cols-1 gap-4">
-                          {['Owned', 'Rented'].map(h => (
-                            <SelectionCard key={h} label={(t.housingTypes as any)[h.toLowerCase()] || h} selected={appState.data.housingType === h} onClick={() => updateData('housingType', h)} fontSizeMode={appState.fontSizeMode} icon={AppIcons.Home} />
-                          ))}
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="font-black text-slate-900 text-[11px] uppercase tracking-[0.2em] mb-5 opacity-40">{t.employment}</h3>
-                        <div className="grid grid-cols-1 gap-4">
-                          {['Retired', 'Working'].map(e => (
-                            <SelectionCard key={e} label={t.employmentStatus[e.toLowerCase() as keyof typeof t.employmentStatus]} selected={appState.data.employmentStatus === e} onClick={() => updateData('employmentStatus', e)} fontSizeMode={appState.fontSizeMode} icon={AppIcons.Job} />
-                          ))}
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-1 gap-6 pt-10 border-t border-slate-100">
-                        <InputWithVoice label={t.occupation} value={appState.data.occupation} onChange={v => updateData('occupation', v)} fontSizeMode={appState.fontSizeMode} language={appState.language} />
-                        <InputWithVoice label={t.hobby} value={appState.data.hobby} onChange={v => updateData('hobby', v)} fontSizeMode={appState.fontSizeMode} language={appState.language} />
-                      </div>
-                    </div>
-                  )}
-
-                  {appState.currentStep === 5 && (
-                    <div className="space-y-8 animate-in zoom-in-95 duration-500">
-                      <div className="bg-indigo-950 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden">
-                         <div className="absolute top-0 right-0 p-4 opacity-10">
-                            <AppIcons.Check size={120} />
-                         </div>
-                         <h3 className="text-4xl font-black mb-3 relative z-10">Verified.</h3>
-                         <p className="text-indigo-200 text-lg font-medium leading-relaxed relative z-10">{t.reviewMsg}</p>
-                      </div>
-                      <div className="space-y-4">
-                        <SummaryCard label={t.fullName} value={appState.data.fullName} isLarge={isLarge} />
-                        <SummaryCard label={t.phone} value={appState.data.phoneNumber} isLarge={isLarge} />
-                        <SummaryCard label={t.housing} value={getTranslatedValue('housingType', appState.data.housingType)} isLarge={isLarge} />
-                        <SummaryCard label={t.hobby} value={appState.data.hobby || '-'} isLarge={isLarge} />
-                      </div>
-                    </div>
-                  )}
+              {appState.currentStep === 5 && (
+                <div className="space-y-8 animate-in zoom-in-95 duration-500">
+                  <div className="bg-indigo-950 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden">
+                     <div className="absolute top-0 right-0 p-4 opacity-10">
+                        <AppIcons.Check size={120} />
+                     </div>
+                     <h3 className="text-4xl font-black mb-3 relative z-10">Verified.</h3>
+                     <p className="text-indigo-200 text-lg font-medium leading-relaxed relative z-10">{t.reviewMsg}</p>
+                  </div>
+                  <div className="space-y-4">
+                    <SummaryCard label={t.fullName} value={appState.data.fullName} isLarge={isLarge} />
+                    <SummaryCard label={t.phone} value={appState.data.phoneNumber} isLarge={isLarge} />
+                    <SummaryCard label={t.housing} value={getTranslatedValue('housingType', appState.data.housingType)} isLarge={isLarge} />
+                    <SummaryCard label={t.hobby} value={appState.data.hobby || '-'} isLarge={isLarge} />
+                  </div>
                 </div>
-              </StepWizard>
-            )}
-          </main>
-        </div>
-      </div>
+              )}
+            </div>
+          </StepWizard>
+        )}
+      </main>
     </div>
   );
 };
