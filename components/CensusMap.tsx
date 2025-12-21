@@ -1,258 +1,136 @@
 import React, { useState } from 'react';
-import { CitizenData } from '../types';
+import { CitizenData, Language } from '../types';
 import { Icons } from './Icons';
+import { translations } from '../services/translations';
 
 interface CensusMapProps {
   userData: CitizenData;
   onReset: () => void;
   fontSizeMode: 'large' | 'extra-large';
+  language: Language;
 }
 
-type FilterType = 'age' | 'marital' | 'education' | 'gender' | 'ethnicity' | 'occupation' | 'ancestry';
-
-// Simplified geometric representation of HK regions for the prototype
-const HK_REGIONS = [
-  { id: 'NT_NORTH', name: 'North NT', x: 200, y: 80, width: 140, height: 100 },
-  { id: 'NT_WEST', name: 'Yuen Long / Tuen Mun', x: 40, y: 100, width: 140, height: 120 },
-  { id: 'NT_EAST', name: 'Sai Kung / Sha Tin', x: 220, y: 200, width: 120, height: 100 },
-  { id: 'KOWLOON', name: 'Kowloon', x: 190, y: 310, width: 100, height: 60 },
-  { id: 'HK_ISLAND', name: 'Hong Kong Island', x: 180, y: 390, width: 130, height: 50 },
-  { id: 'LANTAU', name: 'Lantau Island', x: 20, y: 350, width: 140, height: 80 },
+const HK_SVG_DISTRICTS = [
+  { id: 'NORTH', name: { en: 'North', 'zh-CN': '北区', 'zh-HK': '北區' }, path: "M280,30 L400,30 L400,80 L350,110 L280,90 Z", lx: 340, ly: 60 },
+  { id: 'YUENLONG', name: { en: 'Yuen Long', 'zh-CN': '元朗', 'zh-HK': '元朗' }, path: "M50,40 L275,40 L275,90 L220,130 L120,130 L50,100 Z", lx: 160, ly: 75 },
+  { id: 'TAIPO', name: { en: 'Tai Po', 'zh-CN': '大埔', 'zh-HK': '大埔' }, path: "M280,95 L350,115 L430,115 L430,180 L330,200 L280,180 Z", lx: 355, ly: 145 },
+  { id: 'TUENMUN', name: { en: 'Tuen Mun', 'zh-CN': '屯门', 'zh-HK': '屯門' }, path: "M40,110 L115,135 L115,220 L20,220 L20,150 Z", lx: 65, ly: 175 },
+  { id: 'TSUENWAN', name: { en: 'Tsuen Wan', 'zh-CN': '荃湾', 'zh-HK': '荃灣' }, path: "M120,140 L215,140 L215,190 L120,200 Z", lx: 165, ly: 170 },
+  { id: 'SHATIN', name: { en: 'Sha Tin', 'zh-CN': '沙田', 'zh-HK': '沙田' }, path: "M220,145 L275,100 L325,200 L220,240 Z", lx: 275, ly: 170 },
+  { id: 'SAIKUNG', name: { en: 'Sai Kung', 'zh-CN': '西贡', 'zh-HK': '西貢' }, path: "M330,205 L440,185 L440,340 L330,340 L310,250 Z", lx: 385, ly: 260 },
+  { id: 'KWAITSING', name: { en: 'Kwai Tsing', 'zh-CN': '葵青', 'zh-HK': '葵青' }, path: "M140,205 L215,195 L215,245 L140,245 Z", lx: 175, ly: 225 },
+  { id: 'KOWLOON', name: { en: 'Kowloon', 'zh-CN': '九龙', 'zh-HK': '九龍' }, path: "M170,250 L310,250 L310,320 L170,320 Z", lx: 240, ly: 285 },
+  { id: 'HK_ISLAND', name: { en: 'HK Island', 'zh-CN': '港岛', 'zh-HK': '港島' }, path: "M160,350 L380,350 L380,430 L160,450 Z", lx: 270, ly: 400 },
+  { id: 'LANTAU', name: { en: 'Lantau', 'zh-CN': '大屿山', 'zh-HK': '大嶼山' }, path: "M20,240 L120,240 L120,400 L20,400 Z", lx: 70, ly: 320 },
 ];
 
-export const CensusMap: React.FC<CensusMapProps> = ({ userData, onReset, fontSizeMode }) => {
-  const [activeFilter, setActiveFilter] = useState<FilterType>('age');
-  const isLarge = fontSizeMode === 'large';
+export const CensusMap: React.FC<CensusMapProps> = ({ userData, onReset, fontSizeMode, language }) => {
+  const [activeFilter, setActiveFilter] = useState('age');
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const t = translations[language];
 
-  // Mock density calculation based on filters
-  const getDensityColor = (regionId: string) => {
-    // Deterministic pseudo-random based on region char code and active filter
-    // This simulates different distributions for different stats
-    const seed = regionId.charCodeAt(0) + activeFilter.length;
-    const level = seed % 4; 
-    
-    switch(level) {
-      case 0: return 'fill-blue-100 text-blue-800'; // Low
-      case 1: return 'fill-blue-300 text-blue-900'; // Med
-      case 2: return 'fill-blue-500 text-white';    // High
-      case 3: return 'fill-blue-800 text-white';    // Very High
-      default: return 'fill-slate-200 text-slate-600';
-    }
-  };
-
-  const getLabel = (regionId: string) => {
-    const seed = regionId.charCodeAt(0) + activeFilter.length;
-    const level = seed % 4; 
-    const densities = ['Low', 'Medium', 'High', 'Very High'];
-    return densities[level];
-  };
-
-  const getFilterTitle = () => {
-    switch(activeFilter) {
-      case 'age': return `Age Group: ${userData.age || 'Unknown'}`;
-      case 'marital': return `Status: ${userData.maritalStatus || 'Unknown'}`;
-      case 'education': return `Education: ${userData.education || 'Unknown'}`;
-      case 'gender': return `Gender: ${userData.gender || 'Unknown'}`;
-      case 'ethnicity': return `Ethnicity: ${userData.ethnicity || 'Not Set'}`;
-      case 'occupation': return `Occupation: ${userData.occupation || 'Not Set'}`;
-      case 'ancestry': return `Ancestry: ${userData.ancestry || 'Not Set'}`;
-      default: return 'Distribution';
-    }
+  const getDensityColor = (id: string) => {
+    const seed = (id.length * 7 + activeFilter.length * 3) % 4;
+    const palettes: Record<string, string[]> = {
+      age: ['fill-indigo-100', 'fill-indigo-300', 'fill-indigo-500', 'fill-indigo-700'],
+      housing: ['fill-emerald-100', 'fill-emerald-300', 'fill-emerald-500', 'fill-emerald-700'],
+      occupation: ['fill-blue-100', 'fill-blue-300', 'fill-blue-500', 'fill-blue-700'],
+      hobby: ['fill-rose-100', 'fill-rose-300', 'fill-rose-500', 'fill-rose-700'],
+    };
+    const currentPalette = palettes[activeFilter] || palettes.age;
+    return currentPalette[seed];
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-50">
-      {/* Header */}
-      <div className="bg-white border-b-4 border-blue-900 p-6 shadow-md z-10 shrink-0">
-        <div className="flex items-center gap-4 mb-2">
-          <Icons.Map size={isLarge ? 40 : 56} className="text-blue-800" />
-          <h1 className={`font-bold text-slate-900 ${isLarge ? 'text-3xl' : 'text-4xl'}`}>
-            Community Map
-          </h1>
+    <div className="flex flex-col h-full bg-[#f8fafc] overflow-hidden">
+      {/* Mobile Map Header */}
+      <header className="bg-white/80 backdrop-blur-xl border-b border-slate-100 px-6 pt-12 pb-4 flex justify-between items-center z-40 shrink-0">
+        <div className="flex items-center gap-2">
+          <Icons.Map size={24} className="text-indigo-900" />
+          <h1 className="font-black text-lg text-slate-900 tracking-tighter uppercase truncate max-w-[150px]">{t.mapTitle}</h1>
         </div>
-        <p className={`text-slate-600 ${isLarge ? 'text-lg' : 'text-xl'}`}>
-          See population distribution by category (HK TPUs).
-        </p>
-      </div>
+        <button onClick={onReset} className="bg-slate-900 text-white px-4 py-2 rounded-xl font-bold text-xs">
+          Home
+        </button>
+      </header>
 
-      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-        {/* Sidebar Controls - Scrollable list of filters */}
-        <div className="w-full md:w-80 lg:w-96 bg-white border-r border-slate-200 p-4 flex flex-col shadow-lg z-20 overflow-y-auto shrink-0">
-          <div className={`font-bold text-slate-500 uppercase tracking-wider mb-4 ${isLarge ? 'text-lg' : 'text-xl'}`}>
-            Filter By Personal Data:
-          </div>
-          
-          <div className="flex flex-col gap-3 pb-24 lg:pb-0">
-            <FilterButton 
-              label="Age Group" 
-              subLabel={`${userData.age || '?'} years`}
-              active={activeFilter === 'age'} 
-              onClick={() => setActiveFilter('age')} 
-              icon={Icons.User}
-              isLarge={isLarge}
-            />
-            <FilterButton 
-              label="Gender" 
-              subLabel={userData.gender || 'Not specified'}
-              active={activeFilter === 'gender'} 
-              onClick={() => setActiveFilter('gender')} 
-              icon={Icons.User} // Using User icon for gender generic
-              isLarge={isLarge}
-            />
-            <FilterButton 
-              label="Marital Status" 
-              subLabel={userData.maritalStatus || 'Not specified'}
-              active={activeFilter === 'marital'} 
-              onClick={() => setActiveFilter('marital')} 
-              icon={Icons.Marital}
-              isLarge={isLarge}
-            />
-            <FilterButton 
-              label="Education" 
-              subLabel={userData.education || 'Not specified'}
-              active={activeFilter === 'education'} 
-              onClick={() => setActiveFilter('education')} 
-              icon={Icons.Education}
-              isLarge={isLarge}
-            />
-             <FilterButton 
-              label="Ethnicity" 
-              subLabel={userData.ethnicity || 'Not specified'}
-              active={activeFilter === 'ethnicity'} 
-              onClick={() => setActiveFilter('ethnicity')} 
-              icon={Icons.Ethnicity}
-              isLarge={isLarge}
-            />
-             <FilterButton 
-              label="Occupation" 
-              subLabel={userData.occupation || 'Not specified'}
-              active={activeFilter === 'occupation'} 
-              onClick={() => setActiveFilter('occupation')} 
-              icon={Icons.Job}
-              isLarge={isLarge}
-            />
-             <FilterButton 
-              label="Ancestry" 
-              subLabel={userData.ancestry || 'Not specified'}
-              active={activeFilter === 'ancestry'} 
-              onClick={() => setActiveFilter('ancestry')} 
-              icon={Icons.Ancestry}
-              isLarge={isLarge}
-            />
-
-            <div className="mt-4 pt-4 border-t border-slate-100">
-              <button
-                onClick={onReset}
-                className="w-full bg-yellow-100 hover:bg-yellow-200 text-yellow-900 border-2 border-yellow-400 rounded-xl p-4 flex items-center justify-center gap-3 transition-colors active:scale-95"
+      <div className="flex-1 relative bg-slate-50 overflow-hidden flex items-center justify-center p-4">
+        <svg 
+          viewBox="0 0 500 500" 
+          className="w-full h-auto drop-shadow-2xl animate-in zoom-in-95 duration-1000"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          {HK_SVG_DISTRICTS.map(d => (
+            <g key={d.id} className="group">
+              <path 
+                d={d.path} 
+                className={`${getDensityColor(d.id)} stroke-white stroke-[2] transition-all duration-700`}
+              />
+              <text 
+                x={d.lx} y={d.ly} 
+                textAnchor="middle"
+                className="fill-white font-black text-[12px] pointer-events-none select-none"
+                style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
               >
-                <Icons.Reset size={32} />
-                <span className={`font-bold ${isLarge ? 'text-xl' : 'text-2xl'}`}>Back to Home</span>
-              </button>
+                {d.name[language as keyof typeof d.name]}
+              </text>
+            </g>
+          ))}
+        </svg>
+
+        {/* Floating Legends Button */}
+        <button 
+          onClick={() => setIsDrawerOpen(true)}
+          className="absolute bottom-6 right-6 bg-indigo-600 text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center animate-bounce"
+        >
+          <Icons.Filter size={24} />
+        </button>
+      </div>
+
+      {/* Bottom Drawer for Mobile Insights */}
+      <div className={`fixed inset-x-0 bottom-0 bg-white rounded-t-[40px] shadow-[0_-20px_50px_rgba(0,0,0,0.1)] z-50 transition-transform duration-500 ease-in-out transform ${isDrawerOpen ? 'translate-y-0' : 'translate-y-full'}`}>
+        <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto my-4" onClick={() => setIsDrawerOpen(false)} />
+        <div className="px-8 pb-12 max-h-[60vh] overflow-y-auto no-scrollbar">
+          <section className="mb-8">
+            <h2 className="text-indigo-900 font-black text-[10px] uppercase tracking-widest mb-4">Your Profile</h2>
+            <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-3xl">
+              <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white">
+                <Icons.User size={24} />
+              </div>
+              <div>
+                <div className="text-slate-900 font-black text-lg">{userData.fullName || 'Citizen'}</div>
+                <div className="text-slate-400 font-bold text-[10px] uppercase">{userData.age}Y • {userData.gender}</div>
+              </div>
             </div>
-          </div>
-        </div>
+          </section>
 
-        {/* Map Visualization Area */}
-        <div className="flex-1 bg-slate-100 relative overflow-hidden flex flex-col h-full">
-          {/* Overlay Stats */}
-          <div className="absolute top-4 left-4 right-4 lg:left-8 lg:right-auto bg-white/90 backdrop-blur border-2 border-blue-100 p-4 rounded-xl shadow-lg z-10 max-w-md pointer-events-none">
-            <div className="flex items-center gap-3 mb-2">
-              <Icons.Chart className="text-blue-600" size={32} />
-              <span className={`font-bold text-blue-900 ${isLarge ? 'text-xl' : 'text-2xl'}`}>
-                {getFilterTitle()}
-              </span>
+          <section className="space-y-4">
+            <h2 className="text-slate-400 font-black text-[10px] uppercase tracking-widest">Map Views</h2>
+            <div className="grid grid-cols-2 gap-3">
+              <MapFilterBtn label="Age" active={activeFilter === 'age'} onClick={() => setActiveFilter('age')} />
+              <MapFilterBtn label="Housing" active={activeFilter === 'housing'} onClick={() => setActiveFilter('housing')} />
+              {userData.occupation && <MapFilterBtn label="Job" active={activeFilter === 'occupation'} onClick={() => setActiveFilter('occupation')} />}
+              {userData.hobby && <MapFilterBtn label="Hobby" active={activeFilter === 'hobby'} onClick={() => setActiveFilter('hobby')} />}
             </div>
-            <p className={`text-slate-600 leading-snug ${isLarge ? 'text-lg' : 'text-xl'}`}>
-              Map showing estimated density.
-            </p>
-          </div>
-
-          {/* SVG Map Container */}
-          <div className="flex-1 p-4 flex items-center justify-center overflow-hidden">
-            <svg 
-              viewBox="0 0 400 500" 
-              className="w-full h-full max-w-3xl drop-shadow-2xl"
-              style={{ filter: 'drop-shadow(0px 10px 15px rgba(0,0,0,0.1))', maxHeight: '100%' }}
-              preserveAspectRatio="xMidYMid meet"
-            >
-              {HK_REGIONS.map(region => (
-                <g key={region.id} className="transition-all duration-700 ease-in-out hover:opacity-90 cursor-pointer group">
-                  <rect
-                    x={region.x}
-                    y={region.y}
-                    width={region.width}
-                    height={region.height}
-                    rx="15"
-                    className={`${getDensityColor(region.id)} stroke-white stroke-[3] transition-colors duration-500`}
-                  />
-                  {/* Region Label */}
-                  <text
-                    x={region.x + region.width / 2}
-                    y={region.y + region.height / 2 - 10}
-                    textAnchor="middle"
-                    className="fill-current font-bold text-lg pointer-events-none"
-                    style={{ textShadow: '0 1px 2px rgba(0,0,0,0.1)' }}
-                  >
-                    {region.name}
-                  </text>
-                  {/* Density Label */}
-                  <text
-                    x={region.x + region.width / 2}
-                    y={region.y + region.height / 2 + 15}
-                    textAnchor="middle"
-                    className="fill-current text-sm uppercase tracking-widest font-semibold pointer-events-none opacity-80"
-                  >
-                    {getLabel(region.id)}
-                  </text>
-                </g>
-              ))}
-            </svg>
-          </div>
-
-          {/* Legend */}
-          <div className="p-4 bg-white border-t border-slate-200 flex justify-center gap-2 md:gap-8 flex-wrap shrink-0 z-20">
-            <LegendItem color="bg-blue-100 border-blue-200" label="Low" />
-            <LegendItem color="bg-blue-300 border-blue-400" label="Medium" />
-            <LegendItem color="bg-blue-500 border-blue-600" label="High" />
-            <LegendItem color="bg-blue-800 border-blue-900" label="Max" />
-          </div>
+          </section>
+          
+          <button 
+            onClick={() => setIsDrawerOpen(false)}
+            className="w-full mt-8 py-4 bg-slate-100 text-slate-900 font-black rounded-2xl uppercase text-xs tracking-widest"
+          >
+            Close Insights
+          </button>
         </div>
       </div>
+      
+      {/* Overlay */}
+      {isDrawerOpen && <div className="fixed inset-0 bg-black/20 z-40 backdrop-blur-sm" onClick={() => setIsDrawerOpen(false)} />}
     </div>
   );
 };
 
-const FilterButton: React.FC<{ 
-  label: string; 
-  subLabel: string;
-  active: boolean; 
-  onClick: () => void; 
-  icon: React.ElementType;
-  isLarge: boolean;
-}> = ({ label, subLabel, active, onClick, icon: Icon, isLarge }) => (
-  <button
-    onClick={onClick}
-    className={`w-full text-left p-3 rounded-xl border-4 transition-all duration-200 active:scale-95
-      ${active 
-        ? 'bg-blue-50 border-blue-800 shadow-inner' 
-        : 'bg-white border-slate-100 hover:border-blue-200 shadow-sm'}
-    `}
-  >
-    <div className="flex items-center gap-3">
-      <div className={`p-2 rounded-full shrink-0 ${active ? 'bg-blue-800 text-white' : 'bg-slate-100 text-slate-500'}`}>
-        <Icon size={isLarge ? 20 : 24} />
-      </div>
-      <div className="min-w-0">
-        <div className={`font-bold text-slate-900 truncate ${isLarge ? 'text-lg' : 'text-xl'}`}>{label}</div>
-        <div className={`text-slate-500 truncate ${isLarge ? 'text-sm' : 'text-base'}`}>{subLabel}</div>
-      </div>
-    </div>
+const MapFilterBtn = ({ label, active, onClick }: any) => (
+  <button onClick={onClick} className={`py-4 rounded-2xl font-black text-xs uppercase transition-all border-2 ${active ? 'bg-indigo-900 border-indigo-900 text-white' : 'bg-white border-slate-100 text-slate-500'}`}>
+    {label}
   </button>
-);
-
-const LegendItem: React.FC<{ color: string; label: string }> = ({ color, label }) => (
-  <div className="flex items-center gap-2">
-    <div className={`w-5 h-5 rounded ${color} border-2 shadow-sm`}></div>
-    <span className="text-slate-600 font-bold text-sm md:text-base">{label}</span>
-  </div>
 );

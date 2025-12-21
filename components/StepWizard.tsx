@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react';
-import { STEPS } from '../types';
+import { STEPS, Language } from '../types';
 import { Icons } from './Icons';
+import { translations } from '../services/translations';
 
 interface StepWizardProps {
   currentStep: number;
@@ -12,6 +13,7 @@ interface StepWizardProps {
   canNext: boolean;
   children: ReactNode;
   fontSizeMode: 'large' | 'extra-large';
+  language: Language;
 }
 
 const StepWizard: React.FC<StepWizardProps> = ({
@@ -23,83 +25,64 @@ const StepWizard: React.FC<StepWizardProps> = ({
   onNext,
   canNext,
   children,
-  fontSizeMode
+  fontSizeMode,
+  language
 }) => {
   const isLarge = fontSizeMode === 'large';
-  const progressPercentage = ((currentStep - 1) / (totalSteps - 1)) * 100;
+  const t = translations[language];
+  const progressPercentage = (currentStep / totalSteps) * 100;
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Progress Header */}
-      <div className="bg-white border-b-4 border-blue-900 sticky top-0 z-10 shadow-sm">
-        <div className="w-full bg-slate-200 h-4">
-          <div 
-            className="bg-green-600 h-4 transition-all duration-500 ease-out" 
-            style={{ width: `${Math.max(5, progressPercentage)}%` }}
-          />
-        </div>
-        
-        <div className="p-4 md:p-6 flex justify-between items-center">
-          <div>
-            <span className={`font-bold text-blue-800 ${isLarge ? 'text-lg' : 'text-xl'} uppercase tracking-wider`}>
-              Step {currentStep} of {totalSteps}
-            </span>
-            <h1 className={`font-bold text-slate-900 leading-tight mt-1 ${isLarge ? 'text-3xl' : 'text-5xl'}`}>
-              {title}
-            </h1>
-            <p className={`text-slate-600 mt-2 ${isLarge ? 'text-xl' : 'text-2xl'}`}>
-              {description}
-            </p>
-          </div>
-          
-          <div className="hidden md:block">
-             {/* Visual step indicator for larger screens */}
-             <div className="flex space-x-2">
-                {STEPS.map(s => (
-                  <div 
-                    key={s.id} 
-                    className={`w-4 h-4 rounded-full ${s.id <= currentStep ? 'bg-blue-800' : 'bg-slate-300'}`}
-                  />
-                ))}
-             </div>
-          </div>
-        </div>
+    <div className="flex flex-col h-full bg-[#f8fafc]">
+      {/* Dynamic Progress Bar */}
+      <div className="h-1.5 w-full bg-slate-100 overflow-hidden shrink-0">
+        <div 
+          className="h-full bg-indigo-600 transition-all duration-700 ease-in-out" 
+          style={{ width: `${progressPercentage}%` }} 
+        />
       </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto no-scrollbar p-4 md:p-8 pb-32">
-        <div className="max-w-3xl mx-auto w-full">
+      {/* Hero Header (Smaller for Mobile) */}
+      <div className="bg-white px-6 py-8 border-b border-slate-100 shrink-0">
+        <div className="flex items-center gap-2 mb-2">
+           <span className="text-indigo-600 font-black text-[10px] uppercase tracking-widest">
+             Step {currentStep} of {totalSteps}
+           </span>
+        </div>
+        <h1 className={`font-black text-slate-900 tracking-tight leading-tight ${isLarge ? 'text-3xl' : 'text-4xl'}`}>{title}</h1>
+      </div>
+
+      {/* Content Area (Scrollable) */}
+      <div className="flex-1 overflow-y-auto no-scrollbar px-6 py-6">
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
           {children}
         </div>
       </div>
 
-      {/* Footer Actions */}
-      <div className="bg-white border-t border-slate-200 p-4 md:p-6 sticky bottom-0 z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
-        <div className="max-w-3xl mx-auto w-full flex justify-between gap-4">
-          {currentStep > 1 ? (
+      {/* Bottom Action Bar (Fixed at bottom of screen) */}
+      <div className="px-6 pt-4 pb-10 bg-white/80 backdrop-blur-xl border-t border-slate-100 shrink-0">
+        <div className="flex gap-3">
+          {currentStep > 1 && (
             <button 
-              onClick={onBack}
-              className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 border-2 border-slate-300 rounded-2xl py-4 md:py-6 flex items-center justify-center gap-3 transition-colors active:scale-95"
+              onClick={onBack} 
+              className="w-16 h-16 bg-slate-100 text-slate-700 rounded-2xl flex items-center justify-center transition-all active:scale-95 shadow-sm"
             >
-              <Icons.Back size={isLarge ? 32 : 48} />
-              <span className={`font-bold ${isLarge ? 'text-2xl' : 'text-3xl'}`}>Back</span>
+              <Icons.Back size={24} />
             </button>
-          ) : (
-            <div className="flex-1" /> /* Spacer */
           )}
 
           <button 
-            onClick={onNext}
+            onClick={onNext} 
             disabled={!canNext}
-            className={`flex-[2] rounded-2xl py-4 md:py-6 flex items-center justify-center gap-3 transition-all active:scale-95 shadow-lg
+            className={`flex-1 rounded-2xl py-5 flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-lg
               ${canNext 
-                ? 'bg-blue-800 hover:bg-blue-900 text-white border-2 border-blue-900' 
-                : 'bg-slate-300 text-slate-500 cursor-not-allowed border-2 border-slate-300'}`}
+                ? 'bg-indigo-950 text-white' 
+                : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'}`}
           >
-            <span className={`font-bold ${isLarge ? 'text-2xl' : 'text-3xl'}`}>
-              {currentStep === totalSteps ? 'Confirm & Submit' : 'Next Step'}
+            <span className={`font-black uppercase tracking-widest ${isLarge ? 'text-lg' : 'text-xl'}`}>
+              {currentStep === totalSteps ? t.submit : t.next}
             </span>
-            {currentStep !== totalSteps && <Icons.Next size={isLarge ? 32 : 48} />}
+            {currentStep !== totalSteps && <Icons.Next size={20} />}
           </button>
         </div>
       </div>
