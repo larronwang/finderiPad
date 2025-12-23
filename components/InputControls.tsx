@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Icons } from './Icons';
-import { Language } from '../types';
+import { Icons } from './Icons.tsx';
+import { Language } from '../types.ts';
 
 interface BaseProps {
   fontSizeMode: 'large' | 'extra-large';
@@ -42,17 +42,17 @@ export const InputWithVoice: React.FC<InputWithVoiceProps> = ({
 
   return (
     <div className="w-full">
-      {label && <label className="block font-black text-slate-900 mb-2 uppercase tracking-widest text-[10px] opacity-60">{label}</label>}
-      <div className="flex gap-2">
+      {label && <label className="block font-black text-slate-900 mb-3 uppercase tracking-widest text-[11px] opacity-60">{label}</label>}
+      <div className="flex gap-3">
         <div className="relative flex-1">
           <input
             type={type}
             value={value}
             onChange={e => onChange(e.target.value)}
             readOnly={readOnly}
-            className={`w-full border-2 transition-all duration-300 rounded-2xl px-5 shadow-sm outline-none font-bold
-              ${readOnly ? 'bg-slate-50 border-slate-100 text-slate-400' : 'bg-white border-slate-100 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-50 text-slate-900'}
-              ${isLarge ? 'text-lg h-14' : 'text-xl h-16'}`}
+            className={`w-full border-2 transition-all duration-300 rounded-2xl px-6 shadow-sm outline-none font-bold
+              ${readOnly ? 'bg-slate-50 border-slate-100 text-slate-400' : 'bg-white border-slate-100 focus:border-indigo-600 focus:ring-8 focus:ring-indigo-50 text-slate-900'}
+              ${isLarge ? 'text-xl h-16' : 'text-2xl h-20'}`}
             placeholder={placeholder}
           />
         </div>
@@ -61,9 +61,9 @@ export const InputWithVoice: React.FC<InputWithVoiceProps> = ({
             onClick={startListening} 
             className={`flex-shrink-0 aspect-square rounded-2xl flex items-center justify-center border-2 transition-all duration-300
               ${isListening ? 'bg-indigo-600 border-indigo-600 text-white mic-active scale-105' : 'bg-white border-slate-100 text-indigo-600 shadow-sm'}
-              ${isLarge ? 'w-14' : 'w-16'}`}
+              ${isLarge ? 'w-16' : 'w-20'}`}
           >
-            <Icons.Mic size={24} />
+            <Icons.Mic size={28} />
           </button>
         )}
       </div>
@@ -84,15 +84,15 @@ export const SelectionCard: React.FC<SelectionCardProps> = ({ label, icon: Icon,
   return (
     <button 
       onClick={onClick} 
-      className={`w-full text-left relative rounded-2xl border-2 transition-all duration-300 flex items-center gap-4 px-5 py-4
+      className={`w-full text-left relative rounded-3xl border-2 transition-all duration-300 flex items-center gap-6 px-6 py-5
         ${selected ? 'bg-indigo-950 border-indigo-950 text-white shadow-xl shadow-indigo-100' : 'bg-white border-slate-100 text-slate-600 shadow-sm active:bg-slate-50'}`}
     >
       <div className={`transition-all duration-300 rounded-full flex items-center justify-center shrink-0
         ${selected ? 'bg-white text-indigo-950' : 'bg-slate-100 text-slate-400'}
-        ${isLarge ? 'w-10 h-10' : 'w-12 h-12'}`}>
-        {selected ? <Icons.Check size={20} /> : Icon && <Icon size={20} />}
+        ${isLarge ? 'w-12 h-12' : 'w-16 h-16'}`}>
+        {selected ? <Icons.Check size={24} /> : Icon && <Icon size={24} />}
       </div>
-      <span className={`font-black tracking-tight transition-colors duration-300 ${isLarge ? 'text-lg' : 'text-xl'}`}>
+      <span className={`font-black tracking-tight transition-colors duration-300 ${isLarge ? 'text-xl' : 'text-2xl'}`}>
         {label}
       </span>
     </button>

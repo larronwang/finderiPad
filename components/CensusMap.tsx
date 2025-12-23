@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { CitizenData, Language } from '../types';
-import { Icons } from './Icons';
-import { translations } from '../services/translations';
+import { CitizenData, Language } from '../types.ts';
+import { Icons } from './Icons.tsx';
+import { translations } from '../services/translations.ts';
 
 interface CensusMapProps {
   userData: CitizenData;

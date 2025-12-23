@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
-import { STEPS, Language } from '../types';
-import { Icons } from './Icons';
-import { translations } from '../services/translations';
+import { STEPS, Language } from '../types.ts';
+import { Icons } from './Icons.tsx';
+import { translations } from '../services/translations.ts';
 
 interface StepWizardProps {
   currentStep: number;
@@ -42,47 +42,47 @@ const StepWizard: React.FC<StepWizardProps> = ({
         />
       </div>
 
-      {/* Hero Header (Smaller for Mobile) */}
-      <div className="bg-white px-6 py-8 border-b border-slate-100 shrink-0">
+      {/* Hero Header */}
+      <div className="bg-white px-8 py-10 border-b border-slate-100 shrink-0">
         <div className="flex items-center gap-2 mb-2">
-           <span className="text-indigo-600 font-black text-[10px] uppercase tracking-widest">
+           <span className="text-indigo-600 font-black text-[12px] uppercase tracking-widest">
              Step {currentStep} of {totalSteps}
            </span>
         </div>
-        <h1 className={`font-black text-slate-900 tracking-tight leading-tight ${isLarge ? 'text-3xl' : 'text-4xl'}`}>{title}</h1>
+        <h1 className={`font-black text-slate-900 tracking-tight leading-tight ${isLarge ? 'text-4xl' : 'text-5xl'}`}>{title}</h1>
       </div>
 
-      {/* Content Area (Scrollable) */}
-      <div className="flex-1 overflow-y-auto no-scrollbar px-6 py-6">
+      {/* Content Area */}
+      <div className="flex-1 overflow-y-auto no-scrollbar px-8 py-8">
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
           {children}
         </div>
       </div>
 
-      {/* Bottom Action Bar (Fixed at bottom of screen) */}
-      <div className="px-6 pt-4 pb-10 bg-white/80 backdrop-blur-xl border-t border-slate-100 shrink-0">
-        <div className="flex gap-3">
+      {/* Bottom Action Bar */}
+      <div className="px-8 pt-6 pb-12 bg-white/80 backdrop-blur-xl border-t border-slate-100 shrink-0">
+        <div className="flex gap-4">
           {currentStep > 1 && (
             <button 
               onClick={onBack} 
-              className="w-16 h-16 bg-slate-100 text-slate-700 rounded-2xl flex items-center justify-center transition-all active:scale-95 shadow-sm"
+              className="w-20 h-20 bg-slate-100 text-slate-700 rounded-2xl flex items-center justify-center transition-all active:scale-95 shadow-sm"
             >
-              <Icons.Back size={24} />
+              <Icons.Back size={32} />
             </button>
           )}
 
           <button 
             onClick={onNext} 
             disabled={!canNext}
-            className={`flex-1 rounded-2xl py-5 flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-lg
+            className={`flex-1 rounded-2xl py-6 flex items-center justify-center gap-4 transition-all active:scale-[0.98] shadow-lg
               ${canNext 
                 ? 'bg-indigo-950 text-white' 
                 : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'}`}
           >
-            <span className={`font-black uppercase tracking-widest ${isLarge ? 'text-lg' : 'text-xl'}`}>
+            <span className={`font-black uppercase tracking-widest ${isLarge ? 'text-xl' : 'text-2xl'}`}>
               {currentStep === totalSteps ? t.submit : t.next}
             </span>
-            {currentStep !== totalSteps && <Icons.Next size={20} />}
+            {currentStep !== totalSteps && <Icons.Next size={24} />}
           </button>
         </div>
       </div>

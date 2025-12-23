@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { AppState, CitizenData, INITIAL_DATA, STEPS, Language } from './types';
-import StepWizard from './components/StepWizard';
-import { CensusMap } from './components/CensusMap';
-import { InputWithVoice, SelectionCard } from './components/InputControls';
-import { saveProgress, loadProgress, clearProgress } from './services/idParser';
-import { translations } from './services/translations';
-import { Icons as AppIcons, FinderLogo } from './components/Icons';
+import { AppState, CitizenData, INITIAL_DATA, STEPS, Language } from './types.ts';
+import StepWizard from './components/StepWizard.tsx';
+import { CensusMap } from './components/CensusMap.tsx';
+import { InputWithVoice, SelectionCard } from './components/InputControls.tsx';
+import { saveProgress, loadProgress, clearProgress } from './services/idParser.ts';
+import { translations } from './services/translations.ts';
+import { Icons as AppIcons, FinderLogo } from './components/Icons.tsx';
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>({
@@ -94,8 +94,6 @@ const App: React.FC = () => {
 
   return (
     <div className="screen-container">
-      {/* Status Bar removed per user request */}
-      
       {appState.view === 'wizard' && (
         <header className="bg-white/90 backdrop-blur-xl border-b border-slate-100 px-6 pt-12 pb-4 flex justify-between items-center z-50 shrink-0">
           <div className="flex items-center gap-2">
@@ -121,31 +119,31 @@ const App: React.FC = () => {
 
       <main className="flex-1 overflow-hidden relative">
         {appState.view === 'home' ? (
-          <div className="w-full h-full flex flex-col items-center justify-between bg-[#f8fafc] p-8 pt-24 pb-12">
+          <div className="w-full h-full flex flex-col items-center justify-between bg-[#f8fafc] p-12 pt-24 pb-12">
             <div className="flex flex-col items-center text-center animate-in fade-in zoom-in-95 duration-1000 w-full">
               <FinderLogo className="w-36 h-36 mb-10" />
-              <h1 className="text-[5rem] font-black text-slate-900 tracking-tighter mb-4 leading-none uppercase">
+              <h1 className="text-[6rem] font-black text-slate-900 tracking-tighter mb-4 leading-none uppercase">
                 Finder
               </h1>
-              <p className="text-2xl text-slate-400 font-semibold max-w-[320px] tracking-tight leading-snug">
+              <p className="text-3xl text-slate-400 font-semibold max-w-[420px] tracking-tight leading-snug">
                 Next-Gen Census Discovery for the Silver Generation.
               </p>
             </div>
 
-            <div className="w-full flex flex-col gap-5">
+            <div className="w-full max-w-lg flex flex-col gap-6">
               <button 
                 onClick={() => setAppState(prev => ({ ...prev, view: 'wizard' }))}
-                className="bg-indigo-950 text-white rounded-[2rem] py-8 text-3xl font-black shadow-2xl shadow-indigo-200 hover:bg-black transition-all active:scale-[0.98] flex items-center justify-center gap-4"
+                className="bg-indigo-950 text-white rounded-[2.5rem] py-10 text-4xl font-black shadow-2xl shadow-indigo-200 hover:bg-black transition-all active:scale-[0.98] flex items-center justify-center gap-4"
               >
-                Get Started <AppIcons.Next size={28} />
+                Get Started <AppIcons.Next size={32} />
               </button>
               
-              <div className="flex gap-3 justify-center">
+              <div className="flex gap-4 justify-center">
                 {(['en', 'zh-HK'] as Language[]).map(lang => (
                   <button
                     key={lang}
                     onClick={() => setAppState(prev => ({ ...prev, language: lang }))}
-                    className={`flex-1 py-4 rounded-2xl font-black text-sm tracking-widest uppercase transition-all border-2 ${appState.language === lang ? 'bg-white border-indigo-600 text-indigo-900 shadow-xl shadow-indigo-100/50' : 'bg-transparent border-slate-200 text-slate-400'}`}
+                    className={`flex-1 py-5 rounded-2xl font-black text-base tracking-widest uppercase transition-all border-2 ${appState.language === lang ? 'bg-white border-indigo-600 text-indigo-900 shadow-xl shadow-indigo-100/50' : 'bg-transparent border-slate-200 text-slate-400'}`}
                   >
                     {lang === 'en' ? 'English' : '繁體中文'}
                   </button>
@@ -153,8 +151,8 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            <div className="text-[11px] font-bold text-slate-300 tracking-[0.4em] uppercase text-center mt-6">
-               Secure • Digital Native • 2025
+            <div className="text-[12px] font-bold text-slate-300 tracking-[0.5em] uppercase text-center mt-6">
+               Secure • Digital Native • iPad Optimized • 2025
             </div>
           </div>
         ) : appState.view === 'map' ? (
@@ -250,12 +248,12 @@ const App: React.FC = () => {
 
               {appState.currentStep === 5 && (
                 <div className="space-y-8 animate-in zoom-in-95 duration-500">
-                  <div className="bg-indigo-950 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden">
+                  <div className="bg-indigo-950 rounded-[2.5rem] p-10 text-white shadow-2xl relative overflow-hidden">
                      <div className="absolute top-0 right-0 p-4 opacity-10">
-                        <AppIcons.Check size={120} />
+                        <AppIcons.Check size={160} />
                      </div>
-                     <h3 className="text-4xl font-black mb-3 relative z-10">Verified.</h3>
-                     <p className="text-indigo-200 text-lg font-medium leading-relaxed relative z-10">{t.reviewMsg}</p>
+                     <h3 className="text-5xl font-black mb-4 relative z-10">Verified.</h3>
+                     <p className="text-indigo-200 text-xl font-medium leading-relaxed relative z-10">{t.reviewMsg}</p>
                   </div>
                   <div className="space-y-4">
                     <SummaryCard label={t.fullName} value={appState.data.fullName} isLarge={isLarge} />
